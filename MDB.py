@@ -27,12 +27,15 @@ class MDB(object):
       else:
         #parity = serial.PARITY_EVEN
         parity = 2
-
-    self.__device = Device(self.__deviceid)
-    self.__device.ftdi_fn.ftdi_set_line_property(8, 1, parity)
-    self.__device.baudrate = 9600
-    self.__device.write(data)
-    self.__device.flush()
+    try:
+        self.__device = Device(self.__deviceid)
+        self.__device.ftdi_fn.ftdi_set_line_property(8, 1, parity)
+        self.__device.baudrate = 9600
+        self.__device.write(data)
+        self.__device.flush()
+    except pylibftdi.FtdiError:
+        print "FtdiError"
+        self._ftdisend(data, mode)
 
   def _parityOf(self, int_type):
       parity = 0
@@ -77,7 +80,8 @@ class MDB(object):
       print "IN : OK"
       #self.ack()
     else:
-      print "IN: Fail - " + answer
+      print "IN: Fail"
+      print answer
 
   def poll(self):
     print "OUT: Poll"
@@ -331,3 +335,6 @@ class MDB(object):
 
   def getdeposited(self):
     return self.__deposited
+
+  def cleardeposited(self):
+    self.__deposited = 0
